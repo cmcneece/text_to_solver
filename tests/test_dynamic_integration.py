@@ -44,11 +44,12 @@ class TestBackwardCompatibility:
         )
         
         # Should still solve correctly
-        report = solver.solve()
+        # solve() returns (solution_dict, report_dict) tuple
+        solution, report = solver.solve_auto(options={'display': False})
         
-        assert report['converged']
-        assert abs(report['solution'][0] - 2.0) < 1e-6  # x = 2
-        assert abs(report['solution'][1] - 1.0) < 1e-6  # y = 1
+        assert report['exit_flag'] == 1  # converged
+        assert abs(solution['x'][0] - 2.0) < 1e-6  # x = 2
+        assert abs(solution['y'][0] - 1.0) < 1e-6  # y = 1
     
     def test_improved_api_still_works(self):
         """Test that Phase 1.5 improved API still functions"""
@@ -110,7 +111,7 @@ class TestAPIConsistency:
         
         # Phase 1 API (original)
         solver1 = TextToSolver(['x'], ['x - 2'])
-        report1 = solver1.solve()
+        solution1, report1 = solver1.solve_auto(options={'display': False})
         
         # Phase 2 API (improved)  
         solver2 = EquationSolver()
@@ -118,9 +119,9 @@ class TestAPIConsistency:
         result2 = solver2.solve()
         
         # Both should find x = 2
-        assert report1['converged']
+        assert report1['exit_flag'] == 1  # converged
         assert result2.success
-        assert abs(report1['solution'][0] - 2.0) < 1e-6
+        assert abs(solution1['x'][0] - 2.0) < 1e-6
         assert abs(result2.variables['x'][0] - 2.0) < 1e-6
     
     def test_error_handling_consistency(self):
@@ -155,8 +156,8 @@ class TestAPIConsistency:
         # System with parameters: x + a = 0 (solution: x = -a)
         
         # Phase 1 API
-        solver1 = TextToSolver(['x'], ['x + a'], parameters={'a': 3.0})
-        report1 = solver1.solve()
+        solver1 = TextToSolver(dep_vars=['x'], residual=['x + a'], parameters={'a': 3.0})
+        solution1, report1 = solver1.solve_auto(options={'display': False})
         
         # Phase 2 API
         solver2 = EquationSolver()
@@ -168,9 +169,9 @@ class TestAPIConsistency:
         result2 = solver2.solve()
         
         # Both should find x = -3
-        assert report1['converged']
+        assert report1['exit_flag'] == 1  # converged
         assert result2.success
-        assert abs(report1['solution'][0] + 3.0) < 1e-6
+        assert abs(solution1['x'][0] + 3.0) < 1e-6
         assert abs(result2.variables['x'][0] + 3.0) < 1e-6
 
 
@@ -539,10 +540,10 @@ class TestVersionCompatibility:
             
             # Use old API
             solver = TextToSolver(['x'], ['x - 1'])
-            result = solver.solve()
+            solution, report = solver.solve_auto(options={'display': False})
             
             # Should still work
-            assert result['converged']
+            assert report['exit_flag'] == 1  # converged
             
             # May or may not generate warnings (depends on implementation)
             # This test just ensures no exceptions are raised

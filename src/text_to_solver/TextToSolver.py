@@ -685,10 +685,24 @@ class TextToSolver:
 
         # functionalize the jacobian
         jacobian_func = DataFrame(index=residual, columns=variables)
-        for row in residual:
+        for row_idx, row in enumerate(residual):
             for col in variables:
+                # Get the jacobian element - handle both Series and scalar values
+                jac_elem = jacobian.loc[row, col]
+                # If it's a Series (pandas), extract the actual value
+                if isinstance(jac_elem, pd.Series):
+                    # If Series has multiple values (duplicate rows), take the one at row_idx
+                    if len(jac_elem) > row_idx:
+                        jac_elem = jac_elem.iloc[row_idx]
+                    else:
+                        jac_elem = jac_elem.iloc[0] if len(jac_elem) > 0 else jac_elem
+                # Ensure it's a string or SymPy expression, not a Series
+                if isinstance(jac_elem, str):
+                    jac_expr = sp.sympify(jac_elem)
+                else:
+                    jac_expr = jac_elem
                 jacobian_func.loc[row, col] = sp.lambdify(
-                    self.indep_vars + variables, jacobian.loc[row, col], np)
+                    self.indep_vars + variables, jac_expr, np)
 
         self.jacobian_func = jacobian_func
         self.residual_func = residual_func
@@ -812,7 +826,9 @@ class TextToSolver:
               guess: Optional[Dict[str, npt.NDArray[np.float64]]] = None, 
               indep_var_val: Dict[str, npt.NDArray[np.float64]] = {}, 
               options: Union[Dict[str, Any], 'SolverOptions'] = {},
-              input_options: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
+              input_options: Optional[Dict[str, Any]] = None,
+              auto_guess: bool = False,
+              multistart: bool = False) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
         '''Pass the independent variable values to the Newton solver.
 
         Solves the system of equations given an initial guess for the dependent
@@ -862,9 +878,9 @@ class TextToSolver:
                 options_dict.update(input_options)
                 options = SolverOptions(**options_dict)
         
-        # If no guess provided, use solve_auto
-        if guess is None:
-            return self.solve_auto(options=options, multistart=False, indep_var_val=indep_var_val)
+        # If no guess provided or auto_guess=True, use solve_auto
+        if guess is None or auto_guess:
+            return self.solve_auto(options=options, multistart=multistart, indep_var_val=indep_var_val)
         
         # Handle constraint validation for initial guess
         processed_guess = guess

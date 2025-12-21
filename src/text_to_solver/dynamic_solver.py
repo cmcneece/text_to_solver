@@ -129,6 +129,14 @@ class DifferentialEquationParser:
         param_names = ['alpha', 'beta', 'gamma', 'delta', 'k', 't', 'zeta', 'omega', 'omega0', 'sin', 'cos', 'exp', 'log']
         param_symbols = {name: symbols(name) for name in param_names}
         
+        # Validate equation format before parsing
+        if not equation_to_parse or equation_to_parse.strip() == '':
+            raise EquationSystemError(f"Empty equation: '{equation}'")
+        
+        # Check for obviously malformed equations
+        if equation_to_parse.endswith(('+', '-', '*', '/', '=')):
+            raise EquationSystemError(f"Malformed equation (ends with operator): '{equation}'")
+        
         try:
             # Parse the equation (RHS only)
             all_symbols = {**var_symbols, **param_symbols}
@@ -262,6 +270,25 @@ class DynamicSystem:
                 f"Number of variables ({len(self.variables)}) must match "
                 f"number of equations ({len(self.equations)})"
             )
+        
+        # Validate that equations reference variables in the system
+        parser = DifferentialEquationParser()
+        for i, equation in enumerate(self.equations):
+            try:
+                # Extract variable from derivative notation
+                import re
+                var_match = re.search(r'd(\w+)/dt|(\w+)\'', equation)
+                if var_match:
+                    eq_var = var_match.group(1) or var_match.group(2)
+                    if eq_var not in self.variables:
+                        raise EquationSystemError(
+                            f"Equation {i+1} references variable '{eq_var}' which is not in the system variables: {self.variables}"
+                        )
+            except EquationSystemError:
+                raise
+            except Exception:
+                # If we can't extract variable, that's okay - will be caught during parsing
+                pass
         
         # Check that all variables have initial conditions
         missing_ics = set(self.variables) - set(self.initial_conditions.keys())

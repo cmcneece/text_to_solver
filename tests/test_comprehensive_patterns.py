@@ -436,7 +436,10 @@ class TestComprehensivePerformance:
     @pytest.mark.slow
     def test_memory_usage_validation(self, performance_limits):
         """Test memory usage stays within reasonable bounds"""
-        import psutil
+        try:
+            import psutil
+        except ImportError:
+            pytest.skip("psutil not available, skipping memory usage test")
         import os
         
         process = psutil.Process(os.getpid())
