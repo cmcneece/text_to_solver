@@ -63,6 +63,14 @@ Easy-to-use nonlinear equation solver with symbolic math, constraint handling, a
    :target: https://github.com/cmcneece/text_to_solver
    :alt: GitHub stars
 
+.. image:: https://img.shields.io/github/contributors/cmcneece/text_to_solver.svg
+   :target: https://github.com/cmcneece/text_to_solver/graphs/contributors
+   :alt: Contributors
+
+.. image:: https://img.shields.io/github/release/cmcneece/text_to_solver.svg
+   :target: https://github.com/cmcneece/text_to_solver/releases
+   :alt: Latest release
+
 Overview
 --------
 
