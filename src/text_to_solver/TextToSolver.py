@@ -978,14 +978,26 @@ class TextToSolver:
                     guesses.append(guess)
             else:
                 # Default multistart guesses when no constraints
-                # Use more diverse guesses including negative values and zeros
-                guesses = [
-                    {var: np.array([1.0]) for var in self.variables_string},
-                    {var: np.array([0.1]) for var in self.variables_string},
-                    {var: np.array([10.0]) for var in self.variables_string},
-                    {var: np.array([-1.0]) for var in self.variables_string},
-                    {var: np.array([0.5]) for var in self.variables_string},
-                ]
+                # Use more diverse guesses including negative values, zeros, and small values
+                num_vars = len(self.variables_string)
+                if num_vars == 2:
+                    # For 2-variable systems, try diverse combinations that avoid singular points
+                    guesses = [
+                        {self.variables_string[0]: np.array([1.0]), self.variables_string[1]: np.array([1.0])},
+                        {self.variables_string[0]: np.array([0.1]), self.variables_string[1]: np.array([0.1])},
+                        {self.variables_string[0]: np.array([10.0]), self.variables_string[1]: np.array([10.0])},
+                        {self.variables_string[0]: np.array([2.0]), self.variables_string[1]: np.array([0.1])},
+                        {self.variables_string[0]: np.array([0.1]), self.variables_string[1]: np.array([2.0])},
+                    ]
+                else:
+                    # For other systems, use uniform guesses
+                    guesses = [
+                        {var: np.array([1.0]) for var in self.variables_string},
+                        {var: np.array([0.1]) for var in self.variables_string},
+                        {var: np.array([10.0]) for var in self.variables_string},
+                        {var: np.array([2.0]) for var in self.variables_string},
+                        {var: np.array([0.5]) for var in self.variables_string},
+                    ]
             
             attempts = 0
             for i, guess in enumerate(guesses):
