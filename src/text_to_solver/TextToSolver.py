@@ -6,6 +6,7 @@ Created on Fri Jan 12 13:09:56 2018
 @author: cmcneece
 """
 from pandas import DataFrame
+import pandas as pd
 import numpy as np
 import numpy.typing as npt
 import sympy as sp
