@@ -3,13 +3,45 @@ TextToSolver
 
 Easy-to-use nonlinear equation solver with symbolic math, constraint handling, and dynamic systems support.
 
-.. image:: https://img.shields.io/badge/python-3.6+-blue.svg
+.. image:: https://github.com/cmcneece/text_to_solver/workflows/CI/badge.svg
+   :target: https://github.com/cmcneece/text_to_solver/actions
+   :alt: CI Status
+
+.. image:: https://codecov.io/gh/cmcneece/text_to_solver/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/cmcneece/text_to_solver
+   :alt: Code Coverage
+
+.. image:: https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
    :target: https://www.python.org/downloads/
    :alt: Python version
 
-.. image:: https://img.shields.io/badge/license-BSD-green.svg
+.. image:: https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg
+   :target: https://github.com/cmcneece/text_to_solver/actions
+   :alt: Platform Support
+
+.. image:: https://img.shields.io/badge/license-BSD%203--Clause-green.svg
    :target: LICENSE.txt
    :alt: License
+
+.. image:: https://img.shields.io/badge/version-3.0.0-blue.svg
+   :target: https://github.com/cmcneece/text_to_solver/releases
+   :alt: Version
+
+.. image:: https://img.shields.io/badge/tests-744%20tests%20%7C%20714%20passing-brightgreen.svg
+   :target: https://github.com/cmcneece/text_to_solver/actions
+   :alt: Test Status
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+   :alt: Code style: black
+
+.. image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
+   :target: https://pycqa.github.io/isort/
+   :alt: Imports: isort
+
+.. image:: https://img.shields.io/badge/linting-flake8-yellow.svg
+   :target: https://github.com/PyCQA/flake8
+   :alt: Linting: flake8
 
 Overview
 --------
