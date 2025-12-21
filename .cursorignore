@@ -1,0 +1,62 @@
+# Environment variables and secrets - NEVER index or read these files
+.env
+.env.*
+*.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets/
+*.secret
+*.secrets
+config/secrets.*
+**/secrets.yaml
+**/secrets.yml
+
+# API keys and tokens
+**/api_keys.txt
+**/tokens.txt
+**/credentials.json
+**/credentials.yaml
+**/credentials.yml
+
+# Database credentials
+**/database.ini
+**/db_config.*
+**/db_credentials.*
+
+# Build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+text_to_solver_env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+.pytest_cache/
+.tox/
+htmlcov/
+

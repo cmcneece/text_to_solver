@@ -1,0 +1,51 @@
+# Security Rules for Sensitive Data Protection
+
+## CRITICAL: Never Expose Secrets or Sensitive Data
+
+### Files to NEVER Read, Display, or Execute Commands On:
+- `.env` and all `.env.*` files
+- Any file containing `secret`, `key`, `token`, `credential`, `password`, `api_key` in the name
+- Files in `secrets/` directories
+- Configuration files with sensitive data
+
+### PROHIBITED Commands - DO NOT RUN THESE:
+- `cat .env` or `cat .env.*`
+- `echo .env` or `echo` commands that might output `.env` contents
+- `less .env`, `more .env`, `head .env`, `tail .env`
+- `grep` on `.env` files or files containing secrets
+- `find` commands that search for `.env` files
+- `ls -la .env` or any listing that might expose `.env` contents
+- `type .env` (Windows) or `cat .env` (Unix)
+- `python -c "print(open('.env').read())"` or similar code execution
+- Any command that reads, displays, or processes `.env` or secret files
+- `git show` or `git diff` on `.env` files
+- `strings` or `hexdump` on `.env` files
+
+### Security Best Practices:
+1. **NEVER** read, display, or execute commands on `.env` files or any file containing sensitive data
+2. **NEVER** suggest or execute commands that could expose secrets (cat, echo, less, grep, etc. on sensitive files)
+3. **NEVER** include secrets in code examples, comments, or documentation
+4. **ALWAYS** use environment variables or secure secret management systems
+5. **ALWAYS** validate that `.env` files are in `.gitignore` and `.cursorignore`
+6. If a user asks to read or display `.env` contents, **REFUSE** and explain why it's unsafe
+7. If debugging requires environment variables, suggest using `env | grep VARIABLE_NAME` (without exposing values) or checking if variables are set without displaying their values
+
+### When Working with Environment Variables:
+- Suggest using `os.getenv()` or `os.environ.get()` in Python
+- Recommend using `.env.example` files with placeholder values (never real secrets)
+- Suggest using secure secret management tools (AWS Secrets Manager, HashiCorp Vault, etc.)
+- If environment variables need to be checked, verify they exist without displaying values
+
+### Response Protocol:
+If a user requests to read, display, or execute commands on `.env` or secret files:
+1. **IMMEDIATELY REFUSE** the request
+2. Explain the security risk
+3. Suggest secure alternatives
+4. Do NOT provide workarounds that could expose secrets
+
+### Code Review Checklist:
+- Verify no hardcoded secrets in code
+- Ensure `.env` files are properly ignored
+- Check that environment variables are used instead of hardcoded values
+- Validate that secret files are not committed to version control
+

@@ -1,4 +1,86 @@
-text_to_solver_env/
+# Environment variables and secrets
+.env
+.env.*
+*.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets/
+*.secret
+*.secrets
+config/secrets.*
+**/secrets.yaml
+**/secrets.yml
+
+# API keys and tokens
+**/api_keys.txt
+**/tokens.txt
+**/credentials.json
+**/credentials.yaml
+**/credentials.yml
+
+# Database credentials
+**/database.ini
+**/db_config.*
+**/db_credentials.*
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+text_to_solver_env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
 .coverage
+.pytest_cache/
+.tox/
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
