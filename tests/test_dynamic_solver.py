@@ -184,10 +184,14 @@ class TestDynamicEquationSolver:
         assert solver._system is not None
     
     def test_solve_without_system_error(self):
-        """Test error when trying to integrate without setting system"""
+        """Test that solving without setting system fails gracefully"""
         solver = DynamicEquationSolver()
-        with pytest.raises(ValueError, match="System not set"):
-            solver.integrate((0, 1))
+        
+        # Should return a failure result, not raise
+        result = solver.integrate((0, 1))
+        assert not result.success
+        assert result.message
+        assert len(result.time_points) == 0
 
 
 # ================================================================
