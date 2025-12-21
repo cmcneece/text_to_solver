@@ -281,6 +281,11 @@ class TextToSolver:
         """
         import re
         
+        # Validate equations have equals signs (required for from_equations)
+        for eq in equations:
+            if '=' not in eq:
+                raise ValidationError(f"Equations must contain '=' sign. Got: {eq}")
+        
         # Convert equations to residual form (move everything to LHS)
         residuals = []
         for eq in equations:
@@ -289,7 +294,7 @@ class TextToSolver:
                 lhs, rhs = eq.split('=', 1)
                 residual = f"({lhs.strip()}) - ({rhs.strip()})"
             else:
-                # Already in residual form
+                # Should not reach here due to validation above, but handle gracefully
                 residual = eq.strip()
             residuals.append(residual)
         
@@ -317,7 +322,7 @@ class TextToSolver:
             variables = sorted(list(variables))
         
         if not variables:
-            raise ValueError("Could not detect dependent variables from equations. Please provide 'variables' parameter.")
+            raise ValidationError("No dependent variables found")
         
         return cls(
             dep_vars=variables,
@@ -701,7 +706,17 @@ class TextToSolver:
         sys_string = [self._process_equation_format(eq) for eq in sys_string]
 
         # turn the equation strings into symbolic functions
-        sys_symb = [sp.sympify(eq) for eq in sys_string]
+        # Catch parsing errors and provide helpful messages
+        sys_symb = []
+        for eq in sys_string:
+            try:
+                sys_symb.append(sp.sympify(eq))
+            except Exception as e:
+                # Check if this might be an equation without equals sign
+                if '=' not in eq and any(char in eq for char in ['+', '-', '*', '/', '**']):
+                    raise ValidationError(f"Error parsing equation: {eq}. Equations must contain '=' sign")
+                else:
+                    raise ValidationError(f"Error parsing equation: {eq}. {str(e)}")
 
         # build the jacobian
         jacobian_symb = DataFrame(index=sys_string, columns=var_string)
@@ -780,7 +795,7 @@ class TextToSolver:
         # Check for duplicate variable names
         all_vars = dep_vars + indep_vars
         if len(all_vars) != len(set(all_vars)):
-            raise ValidationError("Duplicate variable names found")
+            raise ValidationError("Variable names must be unique")
 
     def solve(self, 
               guess: Optional[Dict[str, npt.NDArray[np.float64]]] = None, 
@@ -1024,7 +1039,7 @@ class TextToSolver:
         elif strategy == 'random':
             return {var: np.array([np.random.uniform(0.1, 10.0)]) for var in self.variables_string}
         else:
-            raise ValueError(f"Unknown guess strategy: {strategy}. Must be 'auto', 'zero', 'ones', or 'random'.")
+            raise ValueError(f"Unknown strategy: {strategy}")
 
     def package_x(self, x):
         '''
