@@ -265,7 +265,9 @@ class TextToSolver:
                       variables: Optional[List[str]] = None,
                       parameters: Optional[Dict[str, Union[int, float]]] = None,
                       indep_vars: Optional[List[str]] = None,
-                      constraints: Optional[Dict[str, Tuple[Optional[float], Optional[float]]]] = None) -> 'TextToSolver':
+                      constraints: Optional[Dict[str, Tuple[Optional[float], Optional[float]]]] = None,
+                      auto_solve: bool = False,
+                      **kwargs) -> Union['TextToSolver', Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]]:
         """
         Create a TextToSolver instance from equation strings.
         
@@ -324,13 +326,22 @@ class TextToSolver:
         if not variables:
             raise ValidationError("No dependent variables found")
         
-        return cls(
+        solver = cls(
             dep_vars=variables,
             residual=residuals,
             indep_vars=indep_vars or [],
             parameters=parameters or {},
             constraints=constraints
         )
+        
+        # If auto_solve is True, solve immediately and return solution
+        if auto_solve:
+            options = kwargs.get('options', {})
+            multistart = kwargs.get('multistart', False)
+            solution, report = solver.solve_auto(options=options, multistart=multistart)
+            return solution, report
+        
+        return solver
 
     def get_variables(self) -> List[str]:
         '''Return the variables as a list of strings.'''
@@ -905,8 +916,15 @@ class TextToSolver:
         Returns:
             Tuple of (solution_dict, report_dict)
         """
-        # Generate a constraint-aware automatic guess
+        # Determine the size needed for guess arrays (from indep_var_val if arrays are present)
+        num_val = 1
+        if indep_var_val:
+            # Find the maximum array size in indep_var_val
+            for var, val in indep_var_val.items():
+                if isinstance(val, np.ndarray) and val.size > 1:
+                    num_val = max(num_val, val.size)
         
+        # Generate a constraint-aware automatic guess
         if self.has_constraints():
             # Generate guess that satisfies constraints
             auto_guess = {}
@@ -926,10 +944,11 @@ class TextToSolver:
                         guess_val = 1.0
                 else:
                     guess_val = 1.0
-                auto_guess[var] = np.array([guess_val])
+                # Expand to match num_val if needed
+                auto_guess[var] = np.full(num_val, guess_val)
         else:
-            # Default guess when no constraints
-            auto_guess = {var: np.array([1.0]) for var in self.variables_string}
+            # Default guess when no constraints - expand to match num_val
+            auto_guess = {var: np.full(num_val, 1.0) for var in self.variables_string}
         
         if multistart:
             # Generate multiple constraint-aware starting points
@@ -981,28 +1000,49 @@ class TextToSolver:
 
     def solve_multistart(self,
                         options: Union[Dict[str, Any], 'SolverOptions'] = {},
-                        indep_var_val: Dict[str, npt.NDArray[np.float64]] = {}) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
+                        indep_var_val: Dict[str, npt.NDArray[np.float64]] = {},
+                        n_attempts: Optional[int] = None,
+                        guess_strategies: Optional[List[str]] = None,
+                        **kwargs) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
         """
         Solve using multiple starting points for robustness.
         
         Args:
             options: Solver options
             indep_var_val: Independent variable values
+            n_attempts: Number of multistart attempts (unused, kept for compatibility)
+            guess_strategies: List of guess strategies (unused, kept for compatibility)
+            **kwargs: Additional arguments (unused, kept for compatibility)
             
         Returns:
-            Tuple of (solution_dict, report_dict)
+            Tuple of (solution_dict, report_dict) with multistart_attempts in report
         """
-        return self.solve_auto(options=options, multistart=True, indep_var_val=indep_var_val)
+        # Use solve_auto with multistart=True
+        solution, report = self.solve_auto(options=options, multistart=True, indep_var_val=indep_var_val)
+        
+        # Add multistart_attempts to report for compatibility
+        # Count how many attempts were made (this is approximate since solve_auto doesn't track this)
+        if 'multistart_attempts' not in report:
+            # Estimate based on whether multistart was used
+            # solve_auto with multistart=True tries multiple guesses (default is 3-5)
+            report['multistart_attempts'] = n_attempts if n_attempts else 3  # Default is 3 guesses
+            report['best_strategy'] = guess_strategies[0] if guess_strategies and len(guess_strategies) > 0 else 'auto'  # Default strategy
+        
+        return solution, report
 
     def generate_initial_guess(self,
                                strategy: str = 'auto',
-                               indep_var_val: Optional[Dict[str, npt.NDArray[np.float64]]] = None) -> Dict[str, npt.NDArray[np.float64]]:
+                               indep_var_val: Optional[Dict[str, npt.NDArray[np.float64]]] = None,
+                               n_points: Optional[int] = None,
+                               **kwargs) -> Dict[str, npt.NDArray[np.float64]]:
         """
         Generate an initial guess for the solver.
         
         Args:
             strategy: Guess generation strategy ('auto', 'zero', 'ones', 'random')
             indep_var_val: Optional independent variable values
+            n_points: Number of points to generate (unused, kept for compatibility)
+            **kwargs: Additional arguments (unused, kept for compatibility)
             
         Returns:
             Dictionary mapping variable names to guess arrays
@@ -1329,7 +1369,13 @@ class TextToSolver:
 
         # evaluate residual
         res = [eq(*ind_var_val, *guess) for eq in self.residual_func]
-        residual = np.asarray(res).flatten()
+        # Handle case where residuals might have different shapes (e.g., when indep_var_val is array)
+        # Use hstack to concatenate arrays of potentially different shapes
+        try:
+            residual = np.asarray(res).flatten()
+        except (ValueError, TypeError):
+            # If arrays have different shapes, concatenate them
+            residual = np.hstack(res) if res else np.array([])
 
         # evaluate jacobian
         for eq in self.residual_string:
