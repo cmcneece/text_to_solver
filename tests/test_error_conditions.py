@@ -312,7 +312,8 @@ class TestEdgeCases:
     def test_empty_residual(self):
         """Test behavior with empty residual (should be caught earlier)."""
         # This should be caught in validation, but test error handling
-        with pytest.raises((ValueError, IndexError)):
+        from text_to_solver.TextToSolver import ValidationError
+        with pytest.raises((ValueError, IndexError, ValidationError)):
             solver = TextToSolver(
                 dep_vars=['x'],
                 residual=[]
