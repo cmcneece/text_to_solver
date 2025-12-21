@@ -978,25 +978,41 @@ class TextToSolver:
                     guesses.append(guess)
             else:
                 # Default multistart guesses when no constraints
+                # Use more diverse guesses including negative values and zeros
                 guesses = [
                     {var: np.array([1.0]) for var in self.variables_string},
                     {var: np.array([0.1]) for var in self.variables_string},
                     {var: np.array([10.0]) for var in self.variables_string},
+                    {var: np.array([-1.0]) for var in self.variables_string},
+                    {var: np.array([0.5]) for var in self.variables_string},
                 ]
             
+            attempts = 0
             for i, guess in enumerate(guesses):
+                attempts += 1
                 try:
                     solution, report = self.solve(guess, indep_var_val=indep_var_val, options=options)
                     if report.get('exit_flag') == 1:  # Successful convergence
+                        # Add multistart_attempts to report
+                        report['multistart_attempts'] = attempts
+                        report['best_strategy'] = 'auto'
                         return solution, report
                 except Exception:
                     continue
             
             # If all fail, try the first guess and let it fail normally
-            return self.solve(guesses[0], indep_var_val=indep_var_val, options=options)
+            solution, report = self.solve(guesses[0], indep_var_val=indep_var_val, options=options)
+            # Add multistart_attempts even on failure
+            report['multistart_attempts'] = attempts
+            report['best_strategy'] = 'auto'
+            return solution, report
         else:
             # Single attempt with automatic guess
-            return self.solve(auto_guess, indep_var_val=indep_var_val, options=options)
+            solution, report = self.solve(auto_guess, indep_var_val=indep_var_val, options=options)
+            # Add multistart_attempts = 1 for single attempt (for consistency)
+            if 'multistart_attempts' not in report:
+                report['multistart_attempts'] = 1
+            return solution, report
 
     def solve_multistart(self,
                         options: Union[Dict[str, Any], 'SolverOptions'] = {},
@@ -1050,6 +1066,14 @@ class TextToSolver:
         if indep_var_val is None:
             indep_var_val = {}
         
+        # Determine the size needed for guess arrays (from indep_var_val if arrays are present)
+        num_val = 1
+        if indep_var_val:
+            # Find the maximum array size in indep_var_val
+            for var, val in indep_var_val.items():
+                if isinstance(val, np.ndarray) and val.size > 1:
+                    num_val = max(num_val, val.size)
+        
         if strategy == 'auto':
             # Use constraint-aware guess if constraints exist
             if self.has_constraints():
@@ -1067,17 +1091,18 @@ class TextToSolver:
                             guess_val = 1.0
                     else:
                         guess_val = 1.0
-                    guess[var] = np.array([guess_val])
+                    # Expand to match num_val if needed
+                    guess[var] = np.full(num_val, guess_val)
                 return guess
             else:
                 strategy = 'ones'
         
         if strategy == 'zero':
-            return {var: np.array([0.0]) for var in self.variables_string}
+            return {var: np.full(num_val, 0.0) for var in self.variables_string}
         elif strategy == 'ones':
-            return {var: np.array([1.0]) for var in self.variables_string}
+            return {var: np.full(num_val, 1.0) for var in self.variables_string}
         elif strategy == 'random':
-            return {var: np.array([np.random.uniform(0.1, 10.0)]) for var in self.variables_string}
+            return {var: np.array([np.random.uniform(0.1, 10.0) for _ in range(num_val)]) for var in self.variables_string}
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
 

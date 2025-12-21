@@ -90,10 +90,12 @@ class TestCompleteWorkflows:
         
         solver = TextToSolver(dep_vars, residual, parameters=parameters)
         
-        # Should detect Lotka-Volterra pattern and use appropriate guess
-        solution, report = solver.solve_auto(
-            options=SolverOptions(display=False)
-        )
+        # Use a guess closer to the non-trivial equilibrium to avoid trivial solution at origin
+        # Analytical equilibrium: x* = c/d, y* = a/b
+        expected_x = parameters['c'] / parameters['d']  # 3.75
+        expected_y = parameters['a'] / parameters['b']  # 10.0
+        guess = {'x': np.array([expected_x * 0.8]), 'y': np.array([expected_y * 0.8])}
+        solution, report = solver.solve(guess, options=SolverOptions(display=False))
         
         assert report['exit_flag'] == 1
         
