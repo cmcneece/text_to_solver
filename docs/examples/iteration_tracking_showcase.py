@@ -41,8 +41,9 @@ import os
 from typing import Dict, List, Any
 import time
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path for imports
+# Note: In production, the package should be installed with 'pip install -e .'
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'src'))
 
 from text_to_solver.TextToSolver import TextToSolver, SolverOptions
 

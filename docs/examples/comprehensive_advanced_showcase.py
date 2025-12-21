@@ -15,8 +15,9 @@ Perfect for learning the advanced architecture!
 import sys
 import os
 
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path for imports
+# Note: In production, the package should be installed with 'pip install -e .'
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'src'))
 
 import time
 
@@ -34,8 +35,8 @@ from text_to_solver.advanced_patterns import (
 
 # Import domain-specific extensions as examples of user implementations
 try:
-    sys.path.append(os.path.join(os.path.dirname(__file__),
-        'domain_extensions'))
+    # Note: domain_extensions would be in a separate location if used
+    # sys.path.append(os.path.join(os.path.dirname(__file__), 'domain_extensions'))
     from chemical_solver import ChemicalSystemBuilder, ChemicalFactory
     CHEMICAL_EXTENSION_AVAILABLE = True
 except ImportError:

@@ -7,8 +7,9 @@ import numpy as np
 import sys
 import os
 
-# Add the parent directory to sys.path to import text_to_solver
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add the src directory to sys.path to import text_to_solver
+# Note: In production, the package should be installed with 'pip install -e .'
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from text_to_solver.TextToSolver import TextToSolver, SolverOptions
 

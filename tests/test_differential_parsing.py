@@ -13,7 +13,7 @@ import sys
 import os
 
 # Add the parent directory to sys.path to import text_to_solver
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 # Import dynamic solver components
 from text_to_solver.dynamic_solver import (

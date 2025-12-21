@@ -24,8 +24,9 @@ from typing import Dict, List
 import sys
 import os
 
-# Add the package to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add src directory to path for imports
+# Note: In production, the package should be installed with 'pip install -e .'
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'src'))
 
 from text_to_solver import (
     DynamicEquationSolver, 

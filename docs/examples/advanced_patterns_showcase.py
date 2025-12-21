@@ -18,8 +18,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# Add parent directory to path for imports
-sys.path.append('..')
+# Add src directory to path for imports
+# Note: In production, the package should be installed with 'pip install -e .'
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'src'))
 
 # Import the enhanced solver and patterns
 from text_to_solver.enhanced_solver import EnhancedEquationSolver, create_monitored_solver, create_chemical_solver

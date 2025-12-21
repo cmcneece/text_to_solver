@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools-scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "text_to_solver"
+version = "3.0.0"
+description = "Easy to set-up non-linear solver with dynamic systems and programmatic API"
+readme = "README.rst"
+requires-python = ">=3.6"
+license = {text = "BSD"}
+authors = [
+    {name = "Colin J. McNeece", email = "colinjmcneece@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "numpy>=1.15.0",
+    "scipy>=1.1.0",
+    "sympy>=1.3",
+    "pandas>=0.23.0",
+]
+[project.optional-dependencies]
+visualization = [
+    "matplotlib>=3.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/colinjmcneece/text_to_solver"
+Repository = "https://github.com/colinjmcneece/text_to_solver"
+Issues = "https://github.com/colinjmcneece/text_to_solver/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests",
+    "enhanced: Tests for enhanced functionality",
+    "validation: Input validation tests",
+    "multistart: Multi-start solver tests",
+    "guess: Initial guess generation tests",
+    "basic: Basic functionality tests",
+    "advanced_patterns: Advanced patterns tests",
+    "observer: Observer pattern tests",
+    "strategy: Strategy pattern tests",
+    "builder: Builder pattern tests",
+    "factory: Factory method tests",
+    "monitoring: Monitoring and logging tests",
+    "performance: Performance-related tests",
+    "dynamic_systems: Dynamic systems tests",
+    "dynamic: Dynamic/differential equation solving tests",
+    "parsing: Differential equation parsing tests",
+    "integration_methods: Numerical integration method tests",
+    "results: Dynamic result object tests",
+    "interpolation: Interpolation functionality tests",
+    "convenience: Convenience function tests",
+    "error_handling: Error handling and edge case tests",
+    "comparison: Method/performance comparison tests",
+    "stability: Numerical stability tests",
+    "improved_patterns: Tests demonstrating improved testing patterns",
+    "basic_functionality: Core TextToSolver functionality tests",
+    "solving: Equation solving algorithm tests",
+    "algebraic: Algebraic system tests",
+    "comprehensive: Comprehensive cross-functionality tests",
+    "advanced_pattern_tests: Advanced pattern tests",
+    "regression: Regression testing for backward compatibility",
+    "iteration_tracking: Iteration data capture and tracking functionality tests",
+    "constraints: Variable constraint functionality tests",
+    "concurrent: Concurrent user scenario tests",
+    "real_time: Real-time features and progress monitoring tests",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
