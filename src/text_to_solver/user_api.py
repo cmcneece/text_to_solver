@@ -321,6 +321,16 @@ class EquationSolver:
                     guess_strategy=self._guess_strategy
                 )
             
+            # Check for singular matrix or convergence failure BEFORE returning
+            from text_to_solver.TextToSolver import SingularMatrixError
+            if report['exit_flag'] == -1:
+                raise SolverError(
+                    f"Singular matrix encountered - system may be ill-conditioned\n"
+                    f"Suggestions: Try multistart=True or check equation formulation"
+                )
+            elif report['exit_flag'] == 0 and report['res_norm'] > self._tolerance:
+                raise SolverError.convergence_failed(self._max_iterations, report['res_norm'])
+            
             # Convert to user-friendly result format
             # Consider exit_flag 2 as success if residual is small (step size convergence)
             converged = (report['exit_flag'] == 1) or (report['exit_flag'] == 2 and report['res_norm'] < 1e-6)
@@ -332,6 +342,9 @@ class EquationSolver:
                 solver_info=report
             )
             
+        except SolverError:
+            # Re-raise SolverError as-is
+            raise
         except Exception as e:
             # Convert to more helpful error messages
             from text_to_solver.TextToSolver import SingularMatrixError
