@@ -1213,7 +1213,11 @@ class TextToSolver:
             exit_flag = 1  # normal exit
 
         # check the reciprocal condition, approximation to condition number
-        resip_cond = 1/norm(jac)
+        try:
+            resip_cond = 1/norm(jac)
+        except (ZeroDivisionError, ValueError):
+            resip_cond = 0.0
+            exit_flag = -1  # singular matrix
 
         # check norm of residual
         res_norm = np.linalg.norm(res)
@@ -1231,12 +1235,46 @@ class TextToSolver:
         lam_1 = 1
         lam_2 = 1
 
+        # Store initial state in history if requested
+        if STORE_HISTORY:
+            current_time = time.time()
+            constraint_violations = {}
+            active_constraints = {}
+            if self.has_constraints():
+                constraint_violations = self.constraints.compute_constraint_violations(self.variables_string, x)
+                active_constraints = self.constraints.get_active_constraints(self.variables_string, x)
+            
+            initial_iteration_data = IterationData(
+                iteration=0,
+                timestamp=current_time,
+                elapsed_time=0.0,
+                residual_norm=res_norm,
+                step_norm=0.0,
+                convergence_rate=0.0,
+                lambda_factor=1.0,
+                condition_number=1/resip_cond if resip_cond > 0 else float('inf'),
+                residual_vector=res.copy(),
+                solution_vector=x.copy(),
+                solver_params={
+                    'tol_fun': TOL_FUN,
+                    'tol_x': TOL_X,
+                    'max_iter': MAX_ITER,
+                    'alpha': options.get('ALPHA', 1e-4),
+                    'min_lambda': MIN_LAMBDA
+                },
+                jacobian_matrix=jac.copy() if STORE_HISTORY else None,
+                constraint_violations=constraint_violations,
+                active_constraints=active_constraints,
+                projection_applied=False
+            )
+            self._iteration_history.append(initial_iteration_data)
+
         if DISPLAY:
             self.__print_newton_step(iter_count, res_norm, convergence,
                                      resip_cond, step_norm, first=True)
         # run the solver
         while (res_norm > TOL_FUN or lam < 1) and \
-                exit_flag >= 0 and iter_count <= MAX_ITER:
+                exit_flag >= 0 and iter_count < MAX_ITER:
             if lam == 1:
                 # Newton-Raphson solver
                 iter_count += 1  # increment counter
@@ -1329,7 +1367,17 @@ class TextToSolver:
                 exit_flag = -1  # matrix may be singular
                 break
             # check the reciprocal condition, approximation to condition number
-            resip_cond = 1/norm(jac)
+            try:
+                resip_cond = 1/norm(jac)
+            except (ZeroDivisionError, ValueError):
+                resip_cond = 0.0
+                exit_flag = -1  # singular matrix
+                break
+        
+        # Check if max iterations reached
+        if iter_count >= MAX_ITER and exit_flag >= 0:
+            exit_flag = 0  # max iterations reached (but not necessarily failed)
+        
         if DISPLAY:
             print('\n')
 
@@ -1426,14 +1474,26 @@ class TextToSolver:
 
         # determine size of system
         num_res = len(self.residual_string)
-        num_val = 1 if (not ind_var_val) else len(ind_var_val[0])
+        # Handle ind_var_val as dict - get first value's length
+        if ind_var_val and isinstance(ind_var_val, dict):
+            # Get first independent variable value to determine size
+            first_indep_var = list(ind_var_val.values())[0] if ind_var_val else None
+            num_val = 1 if (not ind_var_val or first_indep_var is None) else len(first_indep_var) if hasattr(first_indep_var, '__len__') and not isinstance(first_indep_var, str) else 1
+        else:
+            num_val = 1 if (not ind_var_val) else (len(ind_var_val[0]) if hasattr(ind_var_val, '__getitem__') and len(ind_var_val) > 0 else 1)
 
         # build empty df for jacobian
         jac = DataFrame(index=self.residual_string,
                         columns=self.variables_string)
 
         # evaluate residual
-        res = [eq(*ind_var_val, *guess) for eq in self.residual_func]
+        # Convert ind_var_val dict to list in correct order
+        if isinstance(ind_var_val, dict):
+            indep_list = [ind_var_val.get(var, np.array([0.0])) for var in self.indep_variables_string]
+        else:
+            indep_list = ind_var_val if ind_var_val else []
+        
+        res = [eq(*indep_list, *guess) for eq in self.residual_func]
         # Handle case where residuals might have different shapes (e.g., when indep_var_val is array)
         # Use hstack to concatenate arrays of potentially different shapes
         try:
@@ -1451,9 +1511,9 @@ class TextToSolver:
                     # If Series, take the element at eq_idx
                     if len(jac_func) > eq_idx:
                         jac_func = jac_func.iloc[eq_idx]
-                    else:
-                        jac_func = jac_func.iloc[0] if len(jac_func) > 0 else jac_func
-                temp = jac_func(*ind_var_val, *guess)*np.ones(num_val)
+                else:
+                    jac_func = jac_func.iloc[0] if len(jac_func) > 0 else jac_func
+                temp = jac_func(*indep_list, *guess)*np.ones(num_val)
                 jac.loc[eq, var] = spdiags(temp, 0, num_val, num_val)
         jac_mat = jac.values
         jacobian = [hstack(jac_mat[ind, :]) for ind in range(num_res)]

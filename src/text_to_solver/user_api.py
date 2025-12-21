@@ -334,8 +334,9 @@ class EquationSolver:
             
         except Exception as e:
             # Convert to more helpful error messages
+            from text_to_solver.TextToSolver import SingularMatrixError
             error_msg = str(e).lower()
-            if "singular" in error_msg:
+            if isinstance(e, SingularMatrixError) or "singular" in error_msg:
                 raise SolverError(
                     f"Singular matrix encountered - system may be ill-conditioned\n"
                     f"Original error: {e}\n"
