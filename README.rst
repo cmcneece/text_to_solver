@@ -11,7 +11,7 @@ Easy-to-use nonlinear equation solver with symbolic math, constraint handling, a
    :target: https://codecov.io/gh/cmcneece/text_to_solver
    :alt: Code Coverage
 
-.. image:: https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue.svg
    :target: https://www.python.org/downloads/
    :alt: Python version
 
@@ -369,7 +369,7 @@ More examples are available in the ``docs/examples/`` directory.
 Requirements
 ------------
 
-- Python 3.6+
+- Python 3.7+
 - NumPy >= 1.15.0
 - SciPy >= 1.1.0
 - SymPy >= 1.3

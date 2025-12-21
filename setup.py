@@ -49,6 +49,6 @@ setup(
             'matplotlib>=3.5.0',
         ],
     },
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     zip_safe=False,
 )

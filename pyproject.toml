@@ -7,7 +7,7 @@ name = "text_to_solver"
 version = "3.0.0"
 description = "Easy to set-up non-linear solver with dynamic systems and programmatic API"
 readme = "README.rst"
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 license = {text = "BSD"}
 authors = [
     {name = "Colin J. McNeece", email = "colinjmcneece@gmail.com"}
@@ -20,7 +20,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
