@@ -12,7 +12,7 @@ def read_readme():
 setup(
     name='text_to_solver',
     version='3.0.0',
-    description='Easy to set-up non-linear solver with dynamic systems and web APIs',
+    description='Easy to set-up non-linear solver with dynamic systems and programmatic API',
     long_description=read_readme(),
     long_description_content_type='text/x-rst',
     url='https://github.com/colinjmcneece/text_to_solver',

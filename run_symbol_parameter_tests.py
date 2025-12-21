@@ -30,13 +30,12 @@ def main():
         "tests/test_web_api.py::TestParameterRange",
         "tests/test_web_api.py::TestSymbolDetection", 
         "tests/test_web_api.py::TestParameterSweep",
-        "tests/test_web_app_endpoints.py",
         "tests/test_symbol_parameter_integration.py"
     ]
     
     # Test markers to include
     markers = [
-        "-m", "symbol_detection or parameter_sweep or web_endpoints"
+        "-m", "symbol_detection or parameter_sweep"
     ]
     
     # Configure pytest arguments
@@ -49,7 +48,7 @@ def main():
     ] + test_files
     
     print(f"📋 Running tests: {', '.join(test_files)}")
-    print(f"🏷️  Test markers: symbol_detection, parameter_sweep, web_endpoints")
+    print(f"🏷️  Test markers: symbol_detection, parameter_sweep")
     print()
     
     # Run the tests
