@@ -49,3 +49,71 @@ If a user requests to read, display, or execute commands on `.env` or secret fil
 - Check that environment variables are used instead of hardcoded values
 - Validate that secret files are not committed to version control
 
+---
+
+# Software Development Traceability Rules
+
+## CRITICAL: All Changes Must Be Committed to Git
+
+### Git Commit Requirements:
+1. **ALWAYS commit changes** after completing any code modifications, file additions, or deletions
+2. **NEVER leave uncommitted changes** at the end of a work session
+3. **ALWAYS use descriptive commit messages** that explain what was changed and why
+4. **ALWAYS verify git status** before and after making changes to ensure traceability
+
+### Required Workflow:
+1. **Before making changes**: Check `git status` to see current state
+2. **After making changes**: 
+   - Stage changes with `git add`
+   - Commit with descriptive message using `git commit`
+   - Verify commit with `git log` or `git show`
+3. **Before ending work session**: Ensure all changes are committed
+
+### Commit Message Standards:
+- Use clear, descriptive commit messages
+- Follow format: "Brief summary (50 chars or less)\n\nDetailed explanation if needed"
+- Include context: What was changed, why it was changed
+- Reference related issues or tasks when applicable
+
+### Prohibited Practices:
+- **NEVER** make changes without committing them
+- **NEVER** leave work uncommitted for extended periods
+- **NEVER** use vague commit messages like "fix" or "update"
+- **NEVER** commit multiple unrelated changes in a single commit (unless they're part of the same logical change)
+
+### Traceability Best Practices:
+1. **Commit frequently**: Commit after completing each logical unit of work
+2. **Use feature branches**: Create branches for significant features or changes
+3. **Write meaningful messages**: Commit messages should explain the "what" and "why"
+4. **Review before committing**: Use `git diff` to review changes before committing
+5. **Maintain clean history**: Keep commit history clean and meaningful
+
+### Response Protocol:
+If asked to make changes without committing:
+1. **ALWAYS commit changes** as part of the workflow
+2. **ALWAYS provide commit message** that describes the changes
+3. **ALWAYS verify** the commit was successful
+4. If user explicitly requests to skip committing, **EXPLAIN** the importance of traceability and recommend committing
+
+### Git Status Verification:
+- Before starting work: Check `git status` to understand current state
+- After making changes: Verify changes with `git status` and `git diff`
+- After committing: Confirm with `git log -1` or `git show HEAD`
+
+### Branch Management:
+- Create feature branches for significant changes: `git checkout -b feature/description`
+- Merge branches back to main/master when complete
+- Delete merged branches to keep repository clean
+- Use descriptive branch names that indicate purpose
+
+### Exception Handling:
+- If changes are experimental or temporary, still commit them with a clear message indicating their temporary nature
+- Use commit messages like "WIP: experimental feature" or "TEMP: debugging changes"
+- Clean up temporary commits later through interactive rebase if needed
+
+### Code Review Integration:
+- All commits should be reviewable and understandable
+- Commit messages should provide enough context for code review
+- Related changes should be grouped in logical commits
+- Large changes should be broken into smaller, reviewable commits
+
