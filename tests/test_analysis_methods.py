@@ -34,8 +34,13 @@ class TestAnalyzeConvergence:
         assert 'error' in analysis
         assert analysis['error'] == "No iteration history available"
     
-    def test_analyze_convergence_after_solve(self, solver):
+    def test_analyze_convergence_after_solve(self):
         """Test analyze_convergence after solving."""
+        # Create fresh solver to ensure clean state
+        solver = TextToSolver(
+            dep_vars=['x', 'y'],
+            residual=['x + y - 1', 'x - y - 0.5']
+        )
         guess = {'x': np.array([0.75]), 'y': np.array([0.25])}
         options = SolverOptions(store_history=True, display=False)
         
