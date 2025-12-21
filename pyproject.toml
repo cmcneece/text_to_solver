@@ -94,6 +94,7 @@ markers = [
     "constraints: Variable constraint functionality tests",
     "concurrent: Concurrent user scenario tests",
     "real_time: Real-time features and progress monitoring tests",
+    "workflow: End-to-end workflow tests",
 ]
 
 [tool.black]
