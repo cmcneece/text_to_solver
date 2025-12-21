@@ -254,6 +254,79 @@ class TextToSolver:
         self.generate_symbolic()
         self.functionalize()
 
+    @property
+    def dep_vars(self) -> List[str]:
+        """Backward compatibility property for variables_string."""
+        return self.variables_string
+
+    @classmethod
+    def from_equations(cls,
+                      equations: List[str],
+                      variables: Optional[List[str]] = None,
+                      parameters: Optional[Dict[str, Union[int, float]]] = None,
+                      indep_vars: Optional[List[str]] = None,
+                      constraints: Optional[Dict[str, Tuple[Optional[float], Optional[float]]]] = None) -> 'TextToSolver':
+        """
+        Create a TextToSolver instance from equation strings.
+        
+        Args:
+            equations: List of equation strings (e.g., ['x + y = 3', 'x - y = 1'])
+            variables: Optional list of dependent variable names (auto-detected if None)
+            parameters: Optional dictionary of parameter values
+            indep_vars: Optional list of independent variable names
+            constraints: Optional dictionary of variable constraints
+            
+        Returns:
+            TextToSolver instance
+        """
+        import re
+        
+        # Convert equations to residual form (move everything to LHS)
+        residuals = []
+        for eq in equations:
+            if '=' in eq:
+                # Split on = and move to residual form
+                lhs, rhs = eq.split('=', 1)
+                residual = f"({lhs.strip()}) - ({rhs.strip()})"
+            else:
+                # Already in residual form
+                residual = eq.strip()
+            residuals.append(residual)
+        
+        # Auto-detect variables if not provided
+        if variables is None:
+            variables = set()
+            excluded = {'sin', 'cos', 'tan', 'exp', 'log', 'sqrt', 'pi', 'e',
+                       'log10', 'abs', 'max', 'min', 'sum', 'np', 'abs'}
+            
+            for eq in residuals:
+                # Find potential variable names
+                matches = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*\b', eq)
+                for match in matches:
+                    if match not in excluded:
+                        variables.add(match)
+            
+            # Remove parameters if provided
+            if parameters:
+                variables = variables - set(parameters.keys())
+            
+            # Remove independent variables if provided
+            if indep_vars:
+                variables = variables - set(indep_vars)
+            
+            variables = sorted(list(variables))
+        
+        if not variables:
+            raise ValueError("Could not detect dependent variables from equations. Please provide 'variables' parameter.")
+        
+        return cls(
+            dep_vars=variables,
+            residual=residuals,
+            indep_vars=indep_vars or [],
+            parameters=parameters or {},
+            constraints=constraints
+        )
+
     def get_variables(self) -> List[str]:
         '''Return the variables as a list of strings.'''
         return self.variables_string
@@ -710,9 +783,10 @@ class TextToSolver:
             raise ValidationError("Duplicate variable names found")
 
     def solve(self, 
-              guess: Dict[str, npt.NDArray[np.float64]], 
+              guess: Optional[Dict[str, npt.NDArray[np.float64]]] = None, 
               indep_var_val: Dict[str, npt.NDArray[np.float64]] = {}, 
-              options: Union[Dict[str, Any], 'SolverOptions'] = {}) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
+              options: Union[Dict[str, Any], 'SolverOptions'] = {},
+              input_options: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
         '''Pass the independent variable values to the Newton solver.
 
         Solves the system of equations given an initial guess for the dependent
@@ -723,7 +797,7 @@ class TextToSolver:
             guess (dict): A dictionary of the dependent variables as keys and
                 a value of the initial guess as the value. If independent
                 variables are specified, and are arrays, the guess value must
-                be an array of the same shape.
+                be an array of the same shape. If None, will use solve_auto().
 
         Optional Args:
             indep_vars (dict): A dictionary of the independent variables as
@@ -737,6 +811,7 @@ class TextToSolver:
                 'ALPHA': parameter for decrease in step size
                 'MIN_LAMBDA': minimum value of lamdba (0.1)
                 'MAX_LAMBDA': maximum values of lambda (0.5)
+            input_options (dict): Backward compatibility - merged into options if provided
 
         Returns:
             solution (dict): A dictionary containing the depedent variable
@@ -750,6 +825,20 @@ class TextToSolver:
                         1: solver converged
                         -1: Jacobian matrix may be singular
             '''
+        
+        # Handle backward compatibility: merge input_options into options
+        if input_options is not None:
+            if isinstance(options, dict):
+                options = {**options, **input_options}
+            else:
+                # Convert SolverOptions to dict, merge, then convert back
+                options_dict = {k: getattr(options, k) for k in dir(options) if not k.startswith('_')}
+                options_dict.update(input_options)
+                options = SolverOptions(**options_dict)
+        
+        # If no guess provided, use solve_auto
+        if guess is None:
+            return self.solve_auto(options=options, multistart=False, indep_var_val=indep_var_val)
         
         # Handle constraint validation for initial guess
         processed_guess = guess
@@ -788,7 +877,8 @@ class TextToSolver:
     def solve_auto(self, 
                    options: Union[Dict[str, Any], 'SolverOptions'] = {}, 
                    multistart: bool = False, 
-                   guess_strategy: Optional[str] = None) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
+                   guess_strategy: Optional[str] = None,
+                   indep_var_val: Dict[str, npt.NDArray[np.float64]] = {}) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
         """
         Automatically solve with intelligent guess generation.
         
@@ -862,17 +952,79 @@ class TextToSolver:
             
             for i, guess in enumerate(guesses):
                 try:
-                    solution, report = self.solve(guess, options=options)
+                    solution, report = self.solve(guess, indep_var_val=indep_var_val, options=options)
                     if report.get('exit_flag') == 1:  # Successful convergence
                         return solution, report
                 except Exception:
                     continue
             
             # If all fail, try the first guess and let it fail normally
-            return self.solve(guesses[0], options=options)
+            return self.solve(guesses[0], indep_var_val=indep_var_val, options=options)
         else:
             # Single attempt with automatic guess
-            return self.solve(auto_guess, options=options)
+            return self.solve(auto_guess, indep_var_val=indep_var_val, options=options)
+
+    def solve_multistart(self,
+                        options: Union[Dict[str, Any], 'SolverOptions'] = {},
+                        indep_var_val: Dict[str, npt.NDArray[np.float64]] = {}) -> Tuple[Dict[str, npt.NDArray[np.float64]], Dict[str, Any]]:
+        """
+        Solve using multiple starting points for robustness.
+        
+        Args:
+            options: Solver options
+            indep_var_val: Independent variable values
+            
+        Returns:
+            Tuple of (solution_dict, report_dict)
+        """
+        return self.solve_auto(options=options, multistart=True, indep_var_val=indep_var_val)
+
+    def generate_initial_guess(self,
+                               strategy: str = 'auto',
+                               indep_var_val: Optional[Dict[str, npt.NDArray[np.float64]]] = None) -> Dict[str, npt.NDArray[np.float64]]:
+        """
+        Generate an initial guess for the solver.
+        
+        Args:
+            strategy: Guess generation strategy ('auto', 'zero', 'ones', 'random')
+            indep_var_val: Optional independent variable values
+            
+        Returns:
+            Dictionary mapping variable names to guess arrays
+        """
+        if indep_var_val is None:
+            indep_var_val = {}
+        
+        if strategy == 'auto':
+            # Use constraint-aware guess if constraints exist
+            if self.has_constraints():
+                guess = {}
+                for var in self.variables_string:
+                    if var in self.constraints.bounds:
+                        lower, upper = self.constraints.bounds[var]
+                        if lower is not None and upper is not None:
+                            guess_val = (lower + upper) / 2.0
+                        elif lower is not None:
+                            guess_val = lower + 1.0
+                        elif upper is not None:
+                            guess_val = upper - 1.0
+                        else:
+                            guess_val = 1.0
+                    else:
+                        guess_val = 1.0
+                    guess[var] = np.array([guess_val])
+                return guess
+            else:
+                strategy = 'ones'
+        
+        if strategy == 'zero':
+            return {var: np.array([0.0]) for var in self.variables_string}
+        elif strategy == 'ones':
+            return {var: np.array([1.0]) for var in self.variables_string}
+        elif strategy == 'random':
+            return {var: np.array([np.random.uniform(0.1, 10.0)]) for var in self.variables_string}
+        else:
+            raise ValueError(f"Unknown guess strategy: {strategy}. Must be 'auto', 'zero', 'ones', or 'random'.")
 
     def package_x(self, x):
         '''
