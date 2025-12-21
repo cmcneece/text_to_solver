@@ -2,8 +2,9 @@ include *.txt
 include README.rst
 include MANIFEST.in
 include LICENSE.txt
-recursive-include text_to_solver *.py
-graft examples
-recursive-exclude examples *.pyc
+include pyproject.toml
+recursive-include src/text_to_solver *.py
+graft docs/examples
+recursive-exclude docs/examples *.pyc
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

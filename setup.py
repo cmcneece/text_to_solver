@@ -11,8 +11,8 @@ def read_readme():
 
 setup(
     name='text_to_solver',
-    version='0.1.0',
-    description='Easy to set-up non-linear solver',
+    version='3.0.0',
+    description='Easy to set-up non-linear solver with dynamic systems and programmatic API',
     long_description=read_readme(),
     long_description_content_type='text/x-rst',
     url='https://github.com/colinjmcneece/text_to_solver',
@@ -20,7 +20,7 @@ setup(
     author_email='colinjmcneece@gmail.com',
     license='BSD',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: BSD License',
@@ -36,13 +36,19 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Mathematics',
     ],
-    packages=find_packages(),
+    package_dir={'': 'src'},
+    packages=find_packages(where='src'),
     install_requires=[
         'numpy>=1.15.0',
         'scipy>=1.1.0',
         'sympy>=1.3',
         'pandas>=0.23.0',
     ],
+    extras_require={
+        'visualization': [
+            'matplotlib>=3.5.0',
+        ],
+    },
     python_requires='>=3.6',
     zip_safe=False,
 )
