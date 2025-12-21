@@ -1,0 +1,4 @@
+text_to_solver_env/
+__pycache__/
+*.pyc
+.coverage
