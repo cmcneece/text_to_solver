@@ -187,7 +187,10 @@ def test_user_api_integration_demo():
         
         # Show convergence progression
         residual_norms = [iter_data.residual_norm for iter_data in detailed_history]
-        print(f"   📉 Residual progression: {residual_norms[0]:.2e} → {residual_norms[-1]:.2e}")
+        if len(residual_norms) > 0:
+            print(f"   📉 Residual progression: {residual_norms[0]:.2e} → {residual_norms[-1]:.2e}")
+        else:
+            print(f"   📉 Residual progression: (no iterations recorded)")
         
     else:
         print("   ℹ️  Detailed history not available in user API result")

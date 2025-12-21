@@ -1443,10 +1443,17 @@ class TextToSolver:
             residual = np.hstack(res) if res else np.array([])
 
         # evaluate jacobian
-        for eq in self.residual_string:
+        for eq_idx, eq in enumerate(self.residual_string):
             for var in self.variables_string:
-                temp = self.jacobian_func.loc[eq, var](*ind_var_val,
-                                                       *guess)*np.ones(num_val)
+                jac_func = self.jacobian_func.loc[eq, var]
+                # Handle case where loc returns a Series (duplicate row indices)
+                if hasattr(jac_func, 'iloc'):
+                    # If Series, take the element at eq_idx
+                    if len(jac_func) > eq_idx:
+                        jac_func = jac_func.iloc[eq_idx]
+                    else:
+                        jac_func = jac_func.iloc[0] if len(jac_func) > 0 else jac_func
+                temp = jac_func(*ind_var_val, *guess)*np.ones(num_val)
                 jac.loc[eq, var] = spdiags(temp, 0, num_val, num_val)
         jac_mat = jac.values
         jacobian = [hstack(jac_mat[ind, :]) for ind in range(num_res)]

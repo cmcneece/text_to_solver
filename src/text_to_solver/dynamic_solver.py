@@ -74,6 +74,17 @@ class DynamicSolutionResult:
         """Create interpolation function for a variable."""
         if var_name not in self.variables:
             raise KeyError(f"Variable '{var_name}' not found")
+        
+        # Handle single point case
+        if len(self.time_points) == 1:
+            constant_value = float(self.variables[var_name][0])
+            def constant_func(t):
+                if np.ndim(t) == 0:
+                    return constant_value
+                else:
+                    return np.full_like(t, constant_value, dtype=float)
+            return constant_func
+        
         return interp1d(self.time_points, self.variables[var_name], 
                        kind=kind, bounds_error=False, fill_value='extrapolate')
     
@@ -401,7 +412,13 @@ class DynamicEquationSolver:
             DynamicSolutionResult with time series data
         """
         if not self._system or not self._compiled_system:
-            raise ValueError("System not set or compiled")
+            # Return a graceful failure result instead of raising
+            return DynamicSolutionResult(
+                time_points=np.array([]),
+                variables={},
+                success=False,
+                message="System not set or compiled"
+            )
         
         # Get initial conditions as array
         y0 = np.array([self._system.initial_conditions[var] for var in self._system.variables])
