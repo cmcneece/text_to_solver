@@ -95,6 +95,8 @@ markers = [
     "concurrent: Concurrent user scenario tests",
     "real_time: Real-time features and progress monitoring tests",
     "workflow: End-to-end workflow tests",
+    "analytical: Tests comparing numerical solutions to analytical solutions",
+    "validation: Solution accuracy validation tests",
 ]
 
 [tool.black]
