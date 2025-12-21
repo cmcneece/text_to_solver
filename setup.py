@@ -44,18 +44,7 @@ setup(
         'pandas>=0.23.0',
     ],
     extras_require={
-        'web': [
-            'Flask>=2.0.0',
-            'Flask-CORS>=3.0.0',
-            'Werkzeug>=2.0.0',
-        ],
         'visualization': [
-            'matplotlib>=3.5.0',
-        ],
-        'all': [
-            'Flask>=2.0.0',
-            'Flask-CORS>=3.0.0',
-            'Werkzeug>=2.0.0',
             'matplotlib>=3.5.0',
         ],
     },

@@ -6,7 +6,7 @@ multi-start capabilities, and intuitive user experience.
 
 Available APIs:
 - Original: TextToSolver, SolverOptions (backward compatible)
-- Improved: EquationSolver, ChemicalEquilibrium (new user-friendly API)
+- Improved: EquationSolver (new user-friendly API)
 - Enhanced: EnhancedEquationSolver with advanced patterns
 - Dynamic: DynamicEquationSolver for time-dependent systems
 
@@ -77,32 +77,8 @@ from .advanced_patterns import (
     ConfigurationFactory
 )
 
-# Web API Components (for web application integration)
-try:
-    from .web_api import (
-        WebAPIService,
-        SolverRequest, 
-        SolverResponse,
-        DynamicSolverRequest
-    )
-    from .session_manager import (
-        SessionManager,
-        SessionConfig,
-        SessionState,
-        WebSocketProgressManager
-    )
-    from .visualization_utils import (
-        VisualizationUtils,
-        PlotData,
-        ChartConfig
-    )
-    _WEB_API_AVAILABLE = True
-except ImportError as e:
-    _WEB_API_AVAILABLE = False
-    print(f"Web API components not available: {e}")
-
 # Version info
-__version__ = "3.0.0"  # Comprehensive equation solver with dynamic systems and web APIs
+__version__ = "3.0.0"  # Comprehensive equation solver with dynamic systems
 __author__ = "Colin McNeece"
 
 # Expose APIs at package level
@@ -123,61 +99,29 @@ __all__ = [
     # Enhanced API
     'EnhancedEquationSolver',
     'create_monitored_solver',
-    'create_chemical_solver'
-]
-
-# Dynamic Systems
-__all__.extend([
+    'create_chemical_solver',
+    
+    # Dynamic Systems
     'DynamicEquationSolver',
     'DynamicSystem', 
     'DynamicSolutionResult',
     'DifferentialEquationParser',
     'TimeIntegrator',
-    'solve_ode_system'
-])
-
-# Advanced Patterns
-__all__.extend([
-    # Observer Pattern
+    'solve_ode_system',
+    
+    # Advanced Patterns
     'SolverObserver',
     'ConvergenceMonitor', 
     'ProgressCallback',
     'EventLogger',
     'CallbackManager',
-    
-    # Strategy Pattern
     'SolverStrategy',
     'NewtonRaphsonStrategy',
     'BroydenStrategy',
     'LineSearchStrategy', 
     'ConvergenceStrategy',
-    
-    # Builder Pattern
     'EquationSystemBuilder',
-    
-    # Factory Methods
     'SystemFactory',
     'TemplateFactory',
     'ConfigurationFactory'
-])
-
-# Web API Components (if available)
-if _WEB_API_AVAILABLE:
-    __all__.extend([
-        # Web API Service Layer
-        'WebAPIService',
-        'SolverRequest', 
-        'SolverResponse',
-        'DynamicSolverRequest',
-        
-        # Session Management
-        'SessionManager',
-        'SessionConfig',
-        'SessionState',
-        'WebSocketProgressManager',
-        
-        # Visualization Utilities
-        'VisualizationUtils',
-        'PlotData',
-        'ChartConfig'
-    ])
+]

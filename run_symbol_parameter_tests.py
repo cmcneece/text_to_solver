@@ -25,30 +25,22 @@ def main():
     print("🧪 Symbol Detection & Parameter Sweep Test Suite")
     print("=" * 80)
     
-    # Test files to run
-    test_files = [
-        "tests/test_web_api.py::TestParameterRange",
-        "tests/test_web_api.py::TestSymbolDetection", 
-        "tests/test_web_api.py::TestParameterSweep",
-        "tests/test_symbol_parameter_integration.py"
-    ]
+    # Note: Symbol detection and parameter sweep tests were removed
+    # along with web API components. This test runner is now deprecated.
     
-    # Test markers to include
-    markers = [
-        "-m", "symbol_detection or parameter_sweep"
-    ]
+    print("⚠️  Symbol detection and parameter sweep tests have been removed.")
+    print("    These features were part of the web API components.")
+    print("    This test runner is deprecated.")
+    
+    test_files = []
     
     # Configure pytest arguments
     pytest_args = [
         "-v",                    # Verbose output
         "--tb=short",           # Shorter traceback format
         "--strict-markers",     # Strict marker checking
-        "-x",                   # Stop on first failure
         "--color=yes"           # Colored output
     ] + test_files
-    
-    print(f"📋 Running tests: {', '.join(test_files)}")
-    print(f"🏷️  Test markers: symbol_detection, parameter_sweep")
     print()
     
     # Run the tests
