@@ -691,12 +691,16 @@ class TextToSolver:
                 # Get the jacobian element - handle both Series and scalar values
                 jac_elem = jacobian.loc[row, col]
                 # If it's a Series (pandas), extract the actual value
-                if isinstance(jac_elem, pd.Series):
+                # This can happen when there are duplicate row indices
+                if hasattr(jac_elem, 'iloc'):  # It's a Series or similar
                     # If Series has multiple values (duplicate rows), take the one at row_idx
                     if len(jac_elem) > row_idx:
                         jac_elem = jac_elem.iloc[row_idx]
                     else:
-                        jac_elem = jac_elem.iloc[0] if len(jac_elem) > 0 else jac_elem
+                        jac_elem = jac_elem.iloc[0] if len(jac_elem) > 0 else str(jac_elem)
+                # If it's still a Series (shouldn't happen, but be safe), convert to string first
+                if hasattr(jac_elem, 'iloc'):
+                    jac_elem = str(jac_elem.iloc[0]) if len(jac_elem) > 0 else str(jac_elem)
                 # Ensure it's a string or SymPy expression, not a Series
                 if isinstance(jac_elem, str):
                     jac_expr = sp.sympify(jac_elem)
@@ -753,10 +757,17 @@ class TextToSolver:
 
         # convert symbolic jacobian into strings
         jacobian_string = DataFrame(index=sys_string, columns=var_string)
-        for row in sys_string:
+        for row_idx, row in enumerate(sys_string):
             for col in var_string:
-                jacobian_string.loc[row, col] = \
-                 str(jacobian_symb.loc[row, col])
+                jac_symb_elem = jacobian_symb.loc[row, col]
+                # Handle case where loc returns a Series (duplicate indices)
+                if hasattr(jac_symb_elem, 'iloc'):
+                    # If Series, take the element at row_idx
+                    if len(jac_symb_elem) > row_idx:
+                        jac_symb_elem = jac_symb_elem.iloc[row_idx]
+                    else:
+                        jac_symb_elem = jac_symb_elem.iloc[0] if len(jac_symb_elem) > 0 else jac_symb_elem
+                jacobian_string.loc[row, col] = str(jac_symb_elem)
 
         # put information back into self
         self.jacobian_string = jacobian_string
