@@ -274,7 +274,7 @@ class TestCompatibilityIntegration:
         solver = TextToSolver(dep_vars, residual)
         
         # Use new interface for guess generation
-        guess = solver.generate_initial_guess(strategy='heuristic')
+        guess = solver.generate_initial_guess(strategy='auto')
         
         # Use legacy interface for solving
         legacy_options = {'DISPLAY': False, 'TOL_FUN': 1e-8}
@@ -312,7 +312,7 @@ class TestExampleReproduction:
         ind_var = {'z': z_values}
         
         # Generate guess and solve
-        guess = solver.generate_initial_guess(indep_var_val=ind_var, strategy='heuristic')
+        guess = solver.generate_initial_guess(indep_var_val=ind_var, strategy='auto')
         solution, report = solver.solve(guess, indep_var_val=ind_var, options=options)
         
         assert report['exit_flag'] == 1

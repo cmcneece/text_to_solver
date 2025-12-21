@@ -207,7 +207,7 @@ class TestGuessGenerationErrorHandling:
         guess = simple_linear_system.generate_initial_guess(
             n_points=None,
             indep_var_val=None,
-            strategy='heuristic'
+            strategy='auto'
         )
         
         assert len(guess['x']) == 1

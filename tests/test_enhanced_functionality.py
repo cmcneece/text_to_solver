@@ -58,7 +58,7 @@ class TestSolveAuto:
         """Test solve_auto with specific guess strategy"""
         solution, report = simple_nonlinear_system.solve_auto(
             options=default_solver_options,
-            guess_strategy='heuristic'
+            guess_strategy='auto'
         )
         
         assert report['exit_flag'] == 1
@@ -117,7 +117,7 @@ class TestMultistart:
     
     def test_multistart_strategies(self, simple_nonlinear_system, default_solver_options):
         """Test multistart with specific strategies"""
-        strategies = ['heuristic', 'scaled', 'random']
+        strategies = ['auto', 'random']  # Only use supported strategies
         solution, report = simple_nonlinear_system.solve_multistart(
             guess_strategies=strategies,
             n_attempts=2,
