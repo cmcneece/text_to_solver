@@ -43,6 +43,26 @@ Easy-to-use nonlinear equation solver with symbolic math, constraint handling, a
    :target: https://github.com/PyCQA/flake8
    :alt: Linting: flake8
 
+.. image:: https://img.shields.io/badge/status-active-success.svg
+   :target: https://github.com/cmcneece/text_to_solver
+   :alt: Project Status
+
+.. image:: https://img.shields.io/badge/maintained-yes-green.svg
+   :target: https://github.com/cmcneece/text_to_solver
+   :alt: Maintained
+
+.. image:: https://img.shields.io/github/last-commit/cmcneece/text_to_solver.svg
+   :target: https://github.com/cmcneece/text_to_solver/commits/master
+   :alt: Last commit
+
+.. image:: https://img.shields.io/github/issues/cmcneece/text_to_solver.svg
+   :target: https://github.com/cmcneece/text_to_solver/issues
+   :alt: Issues
+
+.. image:: https://img.shields.io/github/stars/cmcneece/text_to_solver.svg?style=social&label=Star
+   :target: https://github.com/cmcneece/text_to_solver
+   :alt: GitHub stars
+
 Overview
 --------
 
